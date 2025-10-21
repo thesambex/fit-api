@@ -182,8 +182,8 @@ public class PatientServiceTest
     [Fact(DisplayName = "Search with invalid pagination parameters should throws pagination exception")]
     public async Task Search_With_Invalid_Pagination_Parameters_Should_throws_PaginationException()
     {
-        var exception =
-            await Assert.ThrowsAsync<PaginationException>(async () => await _patientService.Search("", 0, 25));
+        var exception = await Assert.ThrowsAsync<PaginationException>(async () =>
+            await _patientService.Search(string.Empty, 0, 25));
 
         Assert.NotNull(exception);
         Assert.Equal("Invalid pagination parameters", exception.Message);
@@ -229,11 +229,11 @@ public class PatientServiceTest
             .ReturnsAsync(patient);
 
         var response = await _patientService.Update(patient.ExternalId, requestBody);
-        
+
         _patientRepository.Verify(r => r.FindByExternalId(patient.ExternalId, CancellationToken.None), Times.Once);
-        
+
         _unitOfWork.Verify(u => u.SaveChangesAsync(CancellationToken.None), Times.Once);
-        
+
         Assert.NotNull(response);
         Assert.Equal(patient.ExternalId, response.Id);
         Assert.Equal(requestBody.Name, response.Name);
@@ -244,10 +244,12 @@ public class PatientServiceTest
     [Fact(DisplayName = "Update with not existing id should throws not found exception")]
     public async Task Update_With_NotExistingId_Should_throws_NotFoundException()
     {
-        var requestBody = new UpdatePatientRequest("Alexis", new DateOnly(1991, 2, 1), BirthGenres.Male); 
-        
-        var exception = await Assert.ThrowsAsync<NotFoundException>(async () => await _patientService.Update(Guid.Empty, requestBody));
-        
+        var requestBody = new UpdatePatientRequest("Alexis", new DateOnly(1991, 2, 1), BirthGenres.Male);
+
+        var exception =
+            await Assert.ThrowsAsync<NotFoundException>(async () =>
+                await _patientService.Update(Guid.Empty, requestBody));
+
         Assert.NotNull(exception);
         Assert.Equal("Patient not found", exception.Message);
     }

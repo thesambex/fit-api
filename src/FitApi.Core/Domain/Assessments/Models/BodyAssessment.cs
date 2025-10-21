@@ -1,4 +1,6 @@
 using FitApi.Core.Domain.Patients.Enums;
+using FitApi.Core.Domain.Patients.Models;
+using FitApi.Core.Domain.Professionals.Models;
 
 namespace FitApi.Core.Domain.Assessments.Models;
 
@@ -10,13 +12,30 @@ public sealed class BodyAssessment
     public decimal Height { get; private set; }
     public decimal Weight { get; private set; }
     public decimal FoldsSum { get; private set; }
+    public Guid ExternalId { get; } = Guid.NewGuid();
+    public long PatientId { get; private init; }
+    public long ProfessionalId { get; private init; }
+
+    public BodyAssessmentSkinFolds? AssessmentSkinFolds { get; set; }
+    public Patient? Patient { get; set; }
+    public Professional? Professional { get; set; }
 
     public BodyAssessment()
     {
     }
 
-    public BodyAssessment(int age, BirthGenres birthGenre, decimal height, decimal weight, SkinFolds skinFolds)
+    public BodyAssessment(
+        long patientId,
+        long professionalId,
+        int age,
+        BirthGenres birthGenre,
+        decimal height,
+        decimal weight,
+        SkinFolds skinFolds
+    )
     {
+        PatientId = patientId;
+        ProfessionalId = professionalId;
         Age = age;
         BirthGenre = birthGenre;
         Height = height;
@@ -25,12 +44,12 @@ public sealed class BodyAssessment
     }
 
     public void SetAge(int age) => Age = age;
-    
+
     public void SetBirthGenre(BirthGenres birthGenre) => BirthGenre = birthGenre;
-    
+
     public void SetHeight(decimal height) => Height = height;
-    
+
     public void SetWeight(decimal weight) => Weight = weight;
-    
+
     public void SetFoldsSum(SkinFolds skinFolds) => FoldsSum = skinFolds.Sum();
 }

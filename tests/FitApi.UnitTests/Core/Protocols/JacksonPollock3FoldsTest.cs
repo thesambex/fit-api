@@ -17,17 +17,17 @@ public class JacksonPollock3FoldsTest
             Suprailiac = 9.2m,
             Thigh = 10.06m
         };
-        
-        _assessment = new BodyAssessment(24, BirthGenres.Male, 1.68m, 67.5m, skinFolds);
+
+        _assessment = new BodyAssessment(-1, -1, 24, BirthGenres.Male, 1.68m, 67.5m, skinFolds);
     }
-    
+
     [Fact(DisplayName = "Test BMI")]
     public void Test_Bmi()
     {
         AbstractProtocol protocol = new JacksonPollock3Folds(_assessment);
 
         var bmi = protocol.Bmi();
-        
+
         Assert.Equal(23.92m, bmi);
     }
 
@@ -37,7 +37,7 @@ public class JacksonPollock3FoldsTest
         AbstractProtocol protocol = new JacksonPollock3Folds(_assessment);
 
         var bodyDensity = protocol.BodyDensity();
-        
+
         Assert.Equal(1.08m, Math.Round(bodyDensity, 2));
     }
 
@@ -49,7 +49,7 @@ public class JacksonPollock3FoldsTest
         var bodyDensity = protocol.BodyDensity();
         var bodyFatPercent = AbstractProtocol.BodyFatPercent(bodyDensity);
         var bodyFatWeight = protocol.BodyFatWeight(bodyFatPercent);
-        
+
         Assert.Equal(7.06m, bodyFatPercent);
         Assert.Equal(4.77m, bodyFatWeight);
     }
@@ -58,7 +58,7 @@ public class JacksonPollock3FoldsTest
     public void Test_LeanMass()
     {
         AbstractProtocol protocol = new JacksonPollock3Folds(_assessment);
-        
+
         var bodyDensity = protocol.BodyDensity();
         var bodyFatPercent = AbstractProtocol.BodyFatPercent(bodyDensity);
         var bodyFatWeight = protocol.BodyFatWeight(bodyFatPercent);

@@ -21,8 +21,8 @@ public class JacksonPollock7FoldsTest
             Abs = 13.66m,
             Thigh = 10.06m
         };
-        
-        _assessment = new BodyAssessment(24, BirthGenres.Male, 1.68m, 67.5m, skinFolds);
+
+        _assessment = new BodyAssessment(-1, -1, 24, BirthGenres.Male, 1.68m, 67.5m, skinFolds);
     }
 
     [Fact(DisplayName = "Test BMI")]
@@ -31,7 +31,7 @@ public class JacksonPollock7FoldsTest
         AbstractProtocol protocol = new JacksonPollock7Folds(_assessment);
 
         var bmi = protocol.Bmi();
-        
+
         Assert.Equal(23.92m, bmi);
     }
 
@@ -41,7 +41,7 @@ public class JacksonPollock7FoldsTest
         AbstractProtocol protocol = new JacksonPollock7Folds(_assessment);
 
         var bodyDensity = protocol.BodyDensity();
-        
+
         Assert.Equal(1.08m, Math.Round(bodyDensity, 2));
     }
 
@@ -53,7 +53,7 @@ public class JacksonPollock7FoldsTest
         var bodyDensity = protocol.BodyDensity();
         var bodyFatPercent = AbstractProtocol.BodyFatPercent(bodyDensity);
         var bodyFatWeight = protocol.BodyFatWeight(bodyFatPercent);
-        
+
         Assert.Equal(8.4m, bodyFatPercent);
         Assert.Equal(5.67m, bodyFatWeight);
     }
@@ -62,7 +62,7 @@ public class JacksonPollock7FoldsTest
     public void Test_LeanMass()
     {
         AbstractProtocol protocol = new JacksonPollock7Folds(_assessment);
-        
+
         var bodyDensity = protocol.BodyDensity();
         var bodyFatPercent = AbstractProtocol.BodyFatPercent(bodyDensity);
         var bodyFatWeight = protocol.BodyFatWeight(bodyFatPercent);

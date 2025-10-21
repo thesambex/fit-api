@@ -1,6 +1,6 @@
 namespace FitApi.Core.Domain.Assessments.Models;
 
-public class BodyAssessmentSkinFolds
+public sealed class BodyAssessmentSkinFolds
 {
     public long Id { get; init; }
     public decimal Triceps { get; private set; }
@@ -13,6 +13,8 @@ public class BodyAssessmentSkinFolds
     public decimal Thigh { get; private set; }
     public decimal Calf { get; private set; }
     public long AssessmentId { get; init; }
+    
+    public BodyAssessment? Assessment { get; set; }
 
     public BodyAssessmentSkinFolds()
     {

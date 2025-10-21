@@ -5,10 +5,12 @@ using FitApi.Core.Domain.Patients.Enums;
 using FitApi.Core.Domain.Patients.Validators;
 using FitApi.Core.Repositories;
 using FitApi.Core.Repositories.Patients;
+using FitApi.Core.Repositories.Professionals;
 using FitApi.Core.Services;
 using FitApi.Database;
 using FitApi.Database.Repositories;
 using FitApi.Database.Repositories.Patients;
+using FitApi.Database.Repositories.Professionals;
 using FitApi.Infra.Services;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -69,10 +71,12 @@ public static class DependencyInjection
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         builder.Services.AddTransient<IPatientRepository, PatientRepository>();
+        builder.Services.AddTransient<IProfessionalRepository, ProfessionalRepository>();
     }
 
     private static void InjectServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IPatientService, PatientService>();
+        builder.Services.AddScoped<IProfessionalService, ProfessionalService>();
     }
 }

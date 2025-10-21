@@ -1,3 +1,4 @@
+using FitApi.Core.Domain.Assessments.Models;
 using FitApi.Core.Domain.Patients.Enums;
 
 namespace FitApi.Core.Domain.Patients.Models;
@@ -10,6 +11,8 @@ public sealed class Patient
     public BirthGenres BirthGenre { get; private set; }
     public Guid ExternalId { get; } = Guid.NewGuid();
 
+    public ICollection<BodyAssessment>? BodyAssessments { get; set; }
+    
     public Patient()
     {
     }

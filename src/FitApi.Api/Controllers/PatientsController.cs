@@ -18,7 +18,7 @@ public class PatientsController(IPatientService patientService) : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [Route("", Name = "CreatePatient")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PatientResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
     public async Task<ActionResult<PatientResponse>> Create(
@@ -76,7 +76,7 @@ public class PatientsController(IPatientService patientService) : ControllerBase
     public async Task<IActionResult> DeleteById(Guid id)
     {
         await patientService.Delete(id);
-        
+
         return NoContent();
     }
 
@@ -89,7 +89,7 @@ public class PatientsController(IPatientService patientService) : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [Route("{id:guid}", Name = "UpdatePatient")]
-    [ProducesResponseType(StatusCodes.Status200OK,  Type = typeof(PatientResponse))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PatientResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]

@@ -70,6 +70,8 @@ public class PgContainerFixture : IAsyncLifetime
         await using var dbContext = CreateContext();
 
         await dbContext.Patients.ExecuteDeleteAsync();
+        await dbContext.Professionals.ExecuteDeleteAsync();
+        
         await dbContext.SaveChangesAsync();
     }
 }
