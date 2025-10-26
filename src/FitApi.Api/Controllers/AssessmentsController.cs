@@ -1,5 +1,6 @@
 using FitApi.Core.Domain.Assessments.DTOs;
 using FitApi.Core.Domain.Common;
+using FitApi.Core.Protocols;
 using FitApi.Core.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -136,5 +137,22 @@ public class AssessmentsController(IAssessmentService assessmentService) : Contr
         await assessmentService.Delete(id);
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Get assessment result
+    /// </summary>
+    /// <param name="id">Assessment Id</param>
+    /// <param name="protocolType">Assessment protocol Type</param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("{id:guid}/result", Name = "GetAssessmentResult")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AssessmentResult))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    public async Task<ActionResult<AssessmentResult>> Result(Guid id, AssessmentsProtocols protocolType)
+    {
+        return await assessmentService.Result(id, protocolType);
     }
 }

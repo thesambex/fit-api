@@ -31,8 +31,7 @@ public sealed class BodyAssessment
         int age,
         BirthGenres birthGenre,
         decimal height,
-        decimal weight,
-        SkinFolds skinFolds
+        decimal weight
     )
     {
         PatientId = patientId;
@@ -41,22 +40,19 @@ public sealed class BodyAssessment
         BirthGenre = birthGenre;
         Height = height;
         Weight = weight;
-        FoldsSum = skinFolds.Sum();
     }
 
     public BodyAssessment(
         int age,
         BirthGenres birthGenre,
         decimal height,
-        decimal weight,
-        SkinFolds skinFolds
+        decimal weight
     )
     {
         Age = age;
         BirthGenre = birthGenre;
         Height = height;
         Weight = weight;
-        FoldsSum = skinFolds.Sum();
     }
 
     public void SetAge(int age) => Age = age;
@@ -67,5 +63,14 @@ public sealed class BodyAssessment
 
     public void SetWeight(decimal weight) => Weight = weight;
 
-    public void SetFoldsSum(SkinFolds skinFolds) => FoldsSum = skinFolds.Sum();
+    public void SetFoldsSum(decimal sum) => FoldsSum = sum;
+
+    public void UpdateFoldSumFromChild()
+    {
+        if (AssessmentSkinFolds != null)
+        {
+            var folds = AssessmentSkinFolds.GetFolds();
+            FoldsSum = folds.Sum();
+        }
+    }
 }

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FitApi.Database.Migrations
 {
     [DbContext(typeof(FitDbContext))]
-    [Migration("20251022181850_Initial")]
+    [Migration("20251026225326_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -121,8 +121,9 @@ namespace FitApi.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("Abs")
-                        .HasColumnType("numeric");
+                    b.Property<decimal>("Abdomen")
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("abdomen");
 
                     b.Property<long>("AssessmentId")
                         .HasColumnType("bigint")

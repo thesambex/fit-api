@@ -4,6 +4,7 @@ using FitApi.Core.Domain.Common;
 using FitApi.Core.Domain.Patients.DTOs;
 using FitApi.Core.Domain.Professionals.DTOs;
 using FitApi.Core.Exceptions;
+using FitApi.Core.Protocols;
 using FitApi.Core.Repositories;
 using FitApi.Core.Repositories.Assessments;
 using FitApi.Core.Repositories.Patients;
@@ -53,7 +54,7 @@ public class AssessmentService(
                 Subscapular = requestBody.Folds.Subscapular,
                 Suprailiac = requestBody.Folds.Suprailiac,
                 MedianAxillary = requestBody.Folds.MedianAxillary,
-                Abs = requestBody.Folds.Abs,
+                Abdomen = requestBody.Folds.Abdomen,
                 Thoracic = requestBody.Folds.Thoracic,
                 Supraspinal = requestBody.Folds.Supraspinal,
                 Thigh = requestBody.Folds.Thigh,
@@ -61,7 +62,7 @@ public class AssessmentService(
             };
 
             var bodyAssessment = new BodyAssessment(patient.Id, professional.Id, patient.GetAge(), patient.BirthGenre,
-                requestBody.Height, requestBody.Weight, skinFolds);
+                requestBody.Height, requestBody.Weight);
 
             await bodyAssessmentRepository.Add(bodyAssessment);
             await unitOfWork.SaveChangesAsync();
@@ -99,6 +100,8 @@ public class AssessmentService(
 
         var patient = bodyAssessment.Patient!;
         var professional = bodyAssessment.Professional!;
+        
+        bodyAssessment.UpdateFoldSumFromChild();
 
         var skinFolds = new SkinFoldsReqResp(
             bodyAssessment.AssessmentSkinFolds?.Triceps ?? 0m,
@@ -106,7 +109,7 @@ public class AssessmentService(
             bodyAssessment.AssessmentSkinFolds?.Subscapular ?? 0m,
             bodyAssessment.AssessmentSkinFolds?.Suprailiac ?? 0m,
             bodyAssessment.AssessmentSkinFolds?.MedianAxillary ?? 0m,
-            bodyAssessment.AssessmentSkinFolds?.Abs ?? 0m,
+            bodyAssessment.AssessmentSkinFolds?.Abdomen ?? 0m,
             bodyAssessment.AssessmentSkinFolds?.Thoracic ?? 0m,
             bodyAssessment.AssessmentSkinFolds?.Supraspinal ?? 0m,
             bodyAssessment.AssessmentSkinFolds?.Thigh ?? 0m,
@@ -163,19 +166,17 @@ public class AssessmentService(
             Subscapular = requestBody.Folds.Subscapular,
             Suprailiac = requestBody.Folds.Suprailiac,
             MedianAxillary = requestBody.Folds.MedianAxillary,
-            Abs = requestBody.Folds.Abs,
+            Abdomen = requestBody.Folds.Abdomen,
             Thoracic = requestBody.Folds.Thoracic,
             Supraspinal = requestBody.Folds.Supraspinal,
             Thigh = requestBody.Folds.Thigh,
             Calf = requestBody.Folds.Calf
         };
 
-        var bodyAssessmentSkinFolds = bodyAssessment.AssessmentSkinFolds;
-        bodyAssessmentSkinFolds?.SetFolds(skinFolds);
+        bodyAssessment.AssessmentSkinFolds?.SetFolds(skinFolds);
 
         bodyAssessment.SetHeight(requestBody.Height);
         bodyAssessment.SetWeight(requestBody.Weight);
-        bodyAssessment.AssessmentSkinFolds = bodyAssessmentSkinFolds;
 
         await unitOfWork.SaveChangesAsync();
 
@@ -201,5 +202,30 @@ public class AssessmentService(
         await unitOfWork.SaveChangesAsync();
 
         logger.LogInformation("Deleted assessment {id}", bodyAssessment.ExternalId);
+    }
+
+    public async Task<AssessmentResult> Result(Guid id, AssessmentsProtocols protocolType)
+    {
+        var bodyAssessment = await bodyAssessmentRepository.FindByExternalId(id);
+        if (bodyAssessment == null)
+        {
+            throw new NotFoundException("Body assessment not found");
+        }
+
+        bodyAssessment.UpdateFoldSumFromChild();
+
+        var folds = bodyAssessment.AssessmentSkinFolds?.GetFolds() ?? new SkinFolds();
+
+        var protocol = ProtocolFactory.CreateProtocol(bodyAssessment, protocolType);
+
+        var bodyDensity = protocol.BodyDensity();
+        var bodyFatPercent = AbstractProtocol.BodyFatPercent(bodyDensity);
+        var bodyFatWeight = protocol.BodyFatWeight(bodyFatPercent);
+        var leanMass = protocol.LeanMass(bodyFatWeight);
+        var bmi = protocol.Bmi();
+
+        return new AssessmentResult(Math.Round(bodyDensity, 4), bodyFatPercent, bodyFatWeight, leanMass, bmi,
+            new SkinFoldsReqResp(folds.Triceps, folds.Biceps, folds.Subscapular, folds.Suprailiac, folds.MedianAxillary,
+                folds.Abdomen, folds.Thoracic, folds.Thoracic, folds.Thigh, folds.Calf), folds.Sum());
     }
 }

@@ -104,7 +104,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
 
         var skinFolds = new SkinFolds { Thigh = 1.2m };
         var bodyAssessment =
-            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m, skinFolds);
+            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m);
 
         await dbContext.BodyAssessments.AddAsync(bodyAssessment);
         await dbContext.SaveChangesAsync();
@@ -130,7 +130,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
         Assert.Equal(patient.BirthGenre, responseBody.PatientResponse.BirthGenre);
         Assert.Equal(bodyAssessment.Height, responseBody.Height);
         Assert.Equal(bodyAssessment.Weight, responseBody.Weight);
-        Assert.Equal(bodyAssessment.FoldsSum, responseBody.FoldsSum);
+        Assert.Equal(skinFolds.Sum(), responseBody.FoldsSum);
 
         await _pgFixture.ClearDatabaseAsync();
     }
@@ -158,7 +158,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
 
         var skinFolds = new SkinFolds { Thigh = 1.2m };
         var bodyAssessment =
-            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m, skinFolds);
+            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m);
 
         await dbContext.BodyAssessments.AddAsync(bodyAssessment);
         await dbContext.SaveChangesAsync();
@@ -230,7 +230,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
 
         var skinFolds = new SkinFolds { Thigh = 1.2m };
         var bodyAssessment =
-            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m, skinFolds);
+            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m);
 
         await dbContext.BodyAssessments.AddAsync(bodyAssessment);
         await dbContext.SaveChangesAsync();
@@ -290,7 +290,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
 
         var skinFolds = new SkinFolds { Thigh = 1.2m };
         var bodyAssessment =
-            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m, skinFolds);
+            new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m);
 
         await dbContext.BodyAssessments.AddAsync(bodyAssessment);
         await dbContext.SaveChangesAsync();
@@ -310,6 +310,67 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
     public async Task Delete_With_NotExisting_Assessment_Should_returns_NotFound()
     {
         var response = await _client.DeleteAsync($"api/assessments/{Guid.Empty}");
+        
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Result with existing id should returns ok")]
+    public async Task Result_With_ExistingId_Should_returns_Ok()
+    {
+        await using var dbContext = _pgFixture.CreateContext();
+
+        var patient = new Patient("John", new DateOnly(2001, 3, 5), BirthGenres.Male);
+        var professional = new Professional("Mary");
+
+        await dbContext.Patients.AddAsync(patient);
+        await dbContext.Professionals.AddAsync(professional);
+
+        await dbContext.SaveChangesAsync();
+
+        var skinFolds = new SkinFolds
+        {
+            Triceps = 6.43m,
+            MedianAxillary = 6.50m,
+            Subscapular = 12.7m,
+            Suprailiac = 9.2m,
+            Thoracic = 4.50m,
+            Abdomen = 13.66m,
+            Thigh = 10.06m,
+            Biceps = 0m,
+            Calf = 0m,
+            Supraspinal = 0m
+        };
+        var bodyAssessment =
+            new BodyAssessment(patient.Id, professional.Id, 24, BirthGenres.Male, 1.68m, 67.5m);
+
+        await dbContext.BodyAssessments.AddAsync(bodyAssessment);
+        await dbContext.SaveChangesAsync();
+
+        var bodyAssessmentSkinFolds = new BodyAssessmentSkinFolds(bodyAssessment.Id, skinFolds);
+
+        await dbContext.BodyAssessmentSkinFolds.AddAsync(bodyAssessmentSkinFolds);
+        await dbContext.SaveChangesAsync();
+        
+        var response = await _client.GetAsync($"api/assessments/{bodyAssessment.ExternalId}/result");
+        response.EnsureSuccessStatusCode();
+
+        var responseBody = await response.Content.ReadFromJsonAsync<AssessmentResult>();
+        
+        Assert.NotNull(responseBody);
+        Assert.Equal(23.92m, responseBody.Bmi);
+        Assert.Equal(5.67m, responseBody.BodyFarWeight);
+        Assert.Equal(8.4m, responseBody.BodyFatPercent);
+        Assert.Equal(63.05m, responseBody.FoldsSum);
+        Assert.Equal(61.83m, responseBody.LeanMass);
+        Assert.Equal(1.0798m, responseBody.BodyDensity);
+        
+        await _pgFixture.ClearDatabaseAsync();
+    }
+
+    [Fact(DisplayName = "Result with not existing id should returns not found")]
+    public async Task Result_With_NotExistingId_Should_returns_NotFound()
+    {
+        var response = await _client.GetAsync($"api/assessments/{Guid.Empty}/result");
         
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

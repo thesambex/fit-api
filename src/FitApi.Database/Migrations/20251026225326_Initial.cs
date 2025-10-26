@@ -109,7 +109,7 @@ namespace FitApi.Database.Migrations
                     thoracic = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     supraspinal = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     thigh = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
-                    Abs = table.Column<decimal>(type: "numeric", nullable: false),
+                    abdomen = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     calf = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     assessment_id = table.Column<long>(type: "bigint", nullable: false)
                 },

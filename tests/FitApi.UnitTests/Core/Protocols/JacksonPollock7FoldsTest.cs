@@ -18,11 +18,12 @@ public class JacksonPollock7FoldsTest
             Subscapular = 12.7m,
             Suprailiac = 9.2m,
             Thoracic = 4.50m,
-            Abs = 13.66m,
+            Abdomen = 13.66m,
             Thigh = 10.06m
         };
 
-        _assessment = new BodyAssessment(-1, -1, 24, BirthGenres.Male, 1.68m, 67.5m, skinFolds);
+        _assessment = new BodyAssessment(-1, -1, 24, BirthGenres.Male, 1.68m, 67.5m);
+        _assessment.SetFoldsSum(skinFolds.Sum());
     }
 
     [Fact(DisplayName = "Test BMI")]

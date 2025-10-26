@@ -6,13 +6,13 @@ public record SkinFoldsReqResp(
     decimal Subscapular,
     decimal Suprailiac,
     decimal MedianAxillary,
-    decimal Abs,
+    decimal Abdomen,
     decimal Thoracic,
     decimal Supraspinal,
     decimal Thigh,
     decimal Calf
 )
 {
-    public decimal Sum() => Triceps + Biceps + Subscapular + Suprailiac + MedianAxillary + Thoracic + Abs +
+    public decimal Sum() => Triceps + Biceps + Subscapular + Suprailiac + MedianAxillary + Thoracic + Abdomen +
                             Supraspinal + Thigh + Calf;
 };

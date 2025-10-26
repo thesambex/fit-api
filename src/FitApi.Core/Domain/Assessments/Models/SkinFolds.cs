@@ -7,12 +7,12 @@ public struct SkinFolds
     public decimal Subscapular;
     public decimal Suprailiac;
     public decimal MedianAxillary;
-    public decimal Abs;
+    public decimal Abdomen;
     public decimal Thoracic;
     public decimal Supraspinal;
     public decimal Thigh;
     public decimal Calf;
 
-    public decimal Sum() => Triceps + Biceps + Subscapular + Suprailiac + MedianAxillary + Thoracic + Abs +
+    public decimal Sum() => Triceps + Biceps + Subscapular + Suprailiac + MedianAxillary + Thoracic + Abdomen +
                             Supraspinal + Thigh + Calf;
 }

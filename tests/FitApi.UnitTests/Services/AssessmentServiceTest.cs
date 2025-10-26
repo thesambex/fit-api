@@ -4,6 +4,7 @@ using FitApi.Core.Domain.Patients.Enums;
 using FitApi.Core.Domain.Patients.Models;
 using FitApi.Core.Domain.Professionals.Models;
 using FitApi.Core.Exceptions;
+using FitApi.Core.Protocols;
 using FitApi.Core.Repositories;
 using FitApi.Core.Repositories.Assessments;
 using FitApi.Core.Repositories.Patients;
@@ -95,7 +96,7 @@ public class AssessmentServiceTest
         Assert.Equal(requestBody.Folds.Subscapular, response.Folds.Subscapular);
         Assert.Equal(requestBody.Folds.Suprailiac, response.Folds.Suprailiac);
         Assert.Equal(requestBody.Folds.Supraspinal, response.Folds.Supraspinal);
-        Assert.Equal(requestBody.Folds.Abs, response.Folds.Abs);
+        Assert.Equal(requestBody.Folds.Abdomen, response.Folds.Abdomen);
         Assert.Equal(requestBody.Folds.Biceps, response.Folds.Biceps);
         Assert.Equal(requestBody.Folds.MedianAxillary, response.Folds.MedianAxillary);
         Assert.Equal(requestBody.Folds.Calf, response.Folds.Calf);
@@ -157,7 +158,7 @@ public class AssessmentServiceTest
             Triceps = 1.2m
         };
 
-        var bodyAssessment = new BodyAssessment(30, BirthGenres.Male, 1.96m, 78.4m, skinFolds)
+        var bodyAssessment = new BodyAssessment(30, BirthGenres.Male, 1.96m, 78.4m)
         {
             Id = 1,
             Patient = patient,
@@ -286,7 +287,7 @@ public class AssessmentServiceTest
             Triceps = 1.2m
         };
 
-        var bodyAssessment = new BodyAssessment(30, BirthGenres.Male, 1.96m, 78.4m, skinFolds)
+        var bodyAssessment = new BodyAssessment(30, BirthGenres.Male, 1.96m, 78.4m)
         {
             Id = 1,
             Patient = patient,
@@ -351,7 +352,7 @@ public class AssessmentServiceTest
             Triceps = 1.2m
         };
 
-        var bodyAssessment = new BodyAssessment(30, BirthGenres.Male, 1.96m, 78.4m, skinFolds)
+        var bodyAssessment = new BodyAssessment(30, BirthGenres.Male, 1.96m, 78.4m)
         {
             Id = 1,
             Patient = patient,
@@ -376,6 +377,56 @@ public class AssessmentServiceTest
     {
         var exception =
             await Assert.ThrowsAsync<NotFoundException>(async () => await _assessmentService.Delete(Guid.Empty));
+
+        Assert.NotNull(exception);
+        Assert.Equal("Body assessment not found", exception.Message);
+    }
+
+    [Fact(DisplayName = "Result with existing id should returns valid assessment")]
+    public async Task Result_With_ExistingId_Should_returns_Valid_Assessment()
+    {
+        var skinFolds = new SkinFolds
+        {
+            Triceps = 6.43m,
+            MedianAxillary = 6.50m,
+            Subscapular = 12.7m,
+            Suprailiac = 9.2m,
+            Thoracic = 4.50m,
+            Abdomen = 13.66m,
+            Thigh = 10.06m,
+            Biceps = 0m,
+            Calf = 0m,
+            Supraspinal = 0m
+        };
+
+        var bodyAssessment = new BodyAssessment(24, BirthGenres.Male, 1.68m, 67.5m)
+        {
+            Id = 1,
+            AssessmentSkinFolds = new BodyAssessmentSkinFolds(1, skinFolds)
+        };
+
+        _bodyAssessmentRepository.Setup(r => r.FindByExternalId(bodyAssessment.ExternalId, CancellationToken.None))
+            .ReturnsAsync(bodyAssessment);
+
+        var response = await _assessmentService.Result(bodyAssessment.ExternalId, AssessmentsProtocols.Jp7);
+
+        _bodyAssessmentRepository.Verify(r => r.FindByExternalId(bodyAssessment.ExternalId, CancellationToken.None),
+            Times.Once);
+        
+        Assert.NotNull(response);
+        Assert.Equal(23.92m, response.Bmi);
+        Assert.Equal(5.67m, response.BodyFarWeight);
+        Assert.Equal(8.4m, response.BodyFatPercent);
+        Assert.Equal(63.05m, response.FoldsSum);
+        Assert.Equal(61.83m, response.LeanMass);
+        Assert.Equal(1.0798m, response.BodyDensity);
+    }
+
+    [Fact(DisplayName = "Result with not existing id should throws not found exception")]
+    public async Task Result_With_NotExistingId_Should_throws_NotFoundException()
+    {
+        var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
+            await _assessmentService.Result(Guid.Empty, AssessmentsProtocols.Jp7));
         
         Assert.NotNull(exception);
         Assert.Equal("Body assessment not found", exception.Message);

@@ -18,7 +18,8 @@ public class JacksonPollock3FoldsTest
             Thigh = 10.06m
         };
 
-        _assessment = new BodyAssessment(-1, -1, 24, BirthGenres.Male, 1.68m, 67.5m, skinFolds);
+        _assessment = new BodyAssessment(-1, -1, 24, BirthGenres.Male, 1.68m, 67.5m);
+        _assessment.SetFoldsSum(skinFolds.Sum());
     }
 
     [Fact(DisplayName = "Test BMI")]

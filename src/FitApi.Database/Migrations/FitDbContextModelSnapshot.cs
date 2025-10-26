@@ -118,8 +118,9 @@ namespace FitApi.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("Abs")
-                        .HasColumnType("numeric");
+                    b.Property<decimal>("Abdomen")
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("abdomen");
 
                     b.Property<long>("AssessmentId")
                         .HasColumnType("bigint")

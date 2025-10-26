@@ -19,6 +19,7 @@ internal class BodyAssessmentSkinFoldsMapping : IEntityTypeConfiguration<BodyAss
         builder.Property(e => e.Thigh).HasColumnName("thigh").HasColumnType("DECIMAL(5,2)");
         builder.Property(e => e.Thoracic).HasColumnName("thoracic").HasColumnType("DECIMAL(5,2)");
         builder.Property(e => e.Calf).HasColumnName("calf").HasColumnType("DECIMAL(5,2)");
+        builder.Property(e => e.Abdomen).HasColumnName("abdomen").HasColumnType("DECIMAL(5,2)");
         builder.Property(e => e.AssessmentId).HasColumnName("assessment_id").IsRequired();
 
         builder.HasOne(e => e.Assessment)
