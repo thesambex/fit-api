@@ -31,6 +31,8 @@ public class IntegrationTestWebAppFactory(PgContainerFixture pgContainerFixture)
                 if (db.Database.GetPendingMigrations().Any())
                 {
                     db.Database.Migrate();
+                    
+                    PgContainerFixture.ApplyViews(db);
                 }
             }
         });

@@ -4,11 +4,13 @@ using FitApi.Api.Middlewares;
 using FitApi.Core.Domain.Patients.Enums;
 using FitApi.Core.Domain.Patients.Validators;
 using FitApi.Core.Repositories;
+using FitApi.Core.Repositories.Assessments;
 using FitApi.Core.Repositories.Patients;
 using FitApi.Core.Repositories.Professionals;
 using FitApi.Core.Services;
 using FitApi.Database;
 using FitApi.Database.Repositories;
+using FitApi.Database.Repositories.Assessments;
 using FitApi.Database.Repositories.Patients;
 using FitApi.Database.Repositories.Professionals;
 using FitApi.Infra.Services;
@@ -72,11 +74,14 @@ public static class DependencyInjection
 
         builder.Services.AddTransient<IPatientRepository, PatientRepository>();
         builder.Services.AddTransient<IProfessionalRepository, ProfessionalRepository>();
+        builder.Services.AddTransient<IBodyAssessmentRepository, BodyAssessmentRepository>();
+        builder.Services.AddTransient<IBodyAssessmentSkinFoldsRepository, BodyAssessmentSkinFoldsRepository>();
     }
 
     private static void InjectServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IPatientService, PatientService>();
         builder.Services.AddScoped<IProfessionalService, ProfessionalService>();
+        builder.Services.AddScoped<IAssessmentService, AssessmentService>();
     }
 }

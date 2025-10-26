@@ -246,8 +246,7 @@ public class PatientServiceTest
     {
         var requestBody = new UpdatePatientRequest("Alexis", new DateOnly(1991, 2, 1), BirthGenres.Male);
 
-        var exception =
-            await Assert.ThrowsAsync<NotFoundException>(async () =>
+        var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
                 await _patientService.Update(Guid.Empty, requestBody));
 
         Assert.NotNull(exception);

@@ -9,7 +9,7 @@ public sealed class Patient
     public string Name { get; private set; } = string.Empty;
     public DateOnly BirthDate { get; private set; }
     public BirthGenres BirthGenre { get; private set; }
-    public Guid ExternalId { get; } = Guid.NewGuid();
+    public Guid ExternalId { get; init; } = Guid.NewGuid();
 
     public ICollection<BodyAssessment>? BodyAssessments { get; set; }
     

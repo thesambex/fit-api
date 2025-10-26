@@ -90,6 +90,8 @@ public class PatientService(
         
         await unitOfWork.SaveChangesAsync();
         
+        logger.LogInformation("Patient {id} updated", patient.ExternalId);
+        
         return new PatientResponse(id, patient.Name, patient.BirthDate, patient.BirthGenre);
     }
 
@@ -103,5 +105,7 @@ public class PatientService(
 
         await patientRepository.DeleteById(patient.Id);
         await unitOfWork.SaveChangesAsync();
+        
+        logger.LogInformation("Patient {id} deleted", patient.ExternalId);
     }
 }

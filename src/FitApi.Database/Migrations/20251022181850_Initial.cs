@@ -70,6 +70,7 @@ namespace FitApi.Database.Migrations
                     height = table.Column<decimal>(type: "numeric(3,2)", nullable: false),
                     weight = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     folds_sum = table.Column<decimal>(type: "numeric(10,9)", nullable: false),
+                    assessment_date = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false, defaultValueSql: "now()"),
                     external_id = table.Column<Guid>(type: "uuid", nullable: false),
                     patient_id = table.Column<long>(type: "bigint", nullable: false),
                     professional_id = table.Column<long>(type: "bigint", nullable: false)
@@ -108,6 +109,7 @@ namespace FitApi.Database.Migrations
                     thoracic = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     supraspinal = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     thigh = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
+                    Abs = table.Column<decimal>(type: "numeric", nullable: false),
                     calf = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
                     assessment_id = table.Column<long>(type: "bigint", nullable: false)
                 },

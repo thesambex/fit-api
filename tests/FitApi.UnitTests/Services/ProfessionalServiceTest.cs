@@ -179,4 +179,68 @@ public class ProfessionalServiceTest
         Assert.NotNull(exception);
         Assert.Equal("Invalid pagination parameters", exception.Message);
     }
+
+    [Fact(DisplayName = "Delete with existing id should returns success")]
+    public async Task Delete_With_ExistingId_Should_returns_Success()
+    {
+        var professional = new Professional("Test")
+        {
+            Id = 1
+        };
+
+        _professionalRepository.Setup(r => r.FindByExternalId(professional.ExternalId, CancellationToken.None))
+            .ReturnsAsync(professional);
+
+        await _professionalService.Delete(professional.ExternalId);
+
+        _professionalRepository.Verify(r => r.FindByExternalId(professional.ExternalId, CancellationToken.None),
+            Times.Once);
+        _professionalRepository.Verify(r => r.DeleteById(professional.Id, CancellationToken.None));
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(CancellationToken.None), Times.Once);
+    }
+
+    [Fact(DisplayName = "Delete with not existing id should throws not found exception")]
+    public async Task Delete_With_NotExistingId_Should_throws_NotFoundException()
+    {
+        var exception =
+            await Assert.ThrowsAsync<NotFoundException>(async () => await _professionalService.Delete(Guid.Empty));
+
+        Assert.NotNull(exception);
+        Assert.Equal("Professional not found", exception.Message);
+    }
+
+    [Fact(DisplayName = "Update with existing id should returns success")]
+    public async Task Update_With_ExistingId_Should_returns_Success()
+    {
+        var requestBody = new UpdateProfessionalRequest("Coy");
+
+        var professional = new Professional("Test");
+
+        _professionalRepository.Setup(r => r.FindByExternalId(professional.ExternalId, CancellationToken.None))
+            .ReturnsAsync(professional);
+
+        var response = await _professionalService.Update(professional.ExternalId, requestBody);
+
+        _professionalRepository.Verify(r => r.FindByExternalId(professional.ExternalId, CancellationToken.None),
+            Times.Once);
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(CancellationToken.None), Times.Once);
+
+        Assert.NotNull(response);
+        Assert.Equal(professional.ExternalId, response.Id);
+        Assert.Equal(requestBody.Name, response.Name);
+    }
+
+    [Fact(DisplayName = "Update with not existing id should throws not found exception")]
+    public async Task Update_With_NotExistingId_Should_throws_NotFoundException()
+    {
+        var requestBody = new UpdateProfessionalRequest("Coy");
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
+                await _professionalService.Update(Guid.Empty, requestBody));
+        
+        Assert.NotNull(exception);
+        Assert.Equal("Professional not found", exception.Message);
+    }
 }

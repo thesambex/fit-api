@@ -19,6 +19,9 @@ public class ProfessionalRepository(FitDbContext dbContext) : IProfessionalRepos
         .Take(pageSize)
         .ToListAsync(cancellationToken);
 
+    public async Task DeleteById(long id, CancellationToken cancellationToken) =>
+        await dbContext.Professionals.Where(e => e.Id == id).ExecuteDeleteAsync(cancellationToken);
+
     public async Task<IReadOnlyList<Professional>> Search(
         string q,
         int pageIndex,

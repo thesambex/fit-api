@@ -1,5 +1,5 @@
+using FitApi.Core.Domain.Assessments.DTOs;
 using FitApi.Core.Domain.Common;
-using FitApi.Core.Domain.Patients.DTOs;
 using FitApi.Core.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -7,23 +7,23 @@ using Microsoft.AspNetCore.Mvc;
 namespace FitApi.Api.Controllers;
 
 [ApiController]
-[Route("api/patients")]
-public class PatientsController(IPatientService patientService) : ControllerBase
+[Route("api/assessments")]
+public class AssessmentsController(IAssessmentService assessmentService) : ControllerBase
 {
     /// <summary>
-    /// Create Patient
+    /// Create new assessment
     /// </summary>
     /// <param name="requestBody">Request Body</param>
     /// <param name="validator"></param>
     /// <returns></returns>
     [HttpPost]
-    [Route("", Name = "CreatePatient")]
-    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(PatientResponse))]
+    [Route("", Name = "CreateAssessment")]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(AssessmentResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    public async Task<ActionResult<PatientResponse>> Create(
-        [FromBody] CreatePatientRequest requestBody,
-        [FromServices] IValidator<CreatePatientRequest> validator
+    public async Task<ActionResult<AssessmentResponse>> Create(
+        [FromBody] CreateAssessmentRequest requestBody,
+        [FromServices] IValidator<CreateAssessmentRequest> validator
     )
     {
         var validationResult = await validator.ValidateAsync(requestBody);
@@ -41,62 +41,65 @@ public class PatientsController(IPatientService patientService) : ControllerBase
             return BadRequest(problem);
         }
 
-        var response = await patientService.Create(requestBody);
+        var response = await assessmentService.Create(requestBody);
 
         return CreatedAtAction("FindById", new { id = response.Id }, response);
     }
 
     /// <summary>
-    /// Find patient by Id
+    /// Find detailed assessment by Id
     /// </summary>
-    /// <param name="id">Patient Id</param>
+    /// <param name="id">Assessment Id</param>
     /// <returns></returns>
     [HttpGet]
-    [Route("{id:guid}", Name = "FindPatientById")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PatientResponse))]
+    [Route("{id:guid}", Name = "FindAssessmentById")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AssessmentResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    public async Task<ActionResult<PatientResponse>> FindById(Guid id)
+    public async Task<ActionResult<AssessmentResponse>> FindById(Guid id)
     {
-        return await patientService.FindById(id);
+        return await assessmentService.FindById(id);
     }
 
     /// <summary>
-    /// Delete patient by Id
+    /// Find all assessments from patient
     /// </summary>
-    /// <param name="id">Patient Id</param>
+    /// <param name="patientId">Patient Id</param>
+    /// <param name="pageIndex">Page Index</param>
+    /// <param name="pageSize">Page Size</param>
     /// <returns></returns>
-    [HttpDelete]
-    [Route("{id:guid}", Name = "DeletePatientById")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [HttpGet]
+    [Route("patient/{patientId:guid}/all", Name = "FindAssessmentsByPatientId")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginationResponse<AssessmentBriefResponse>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    public async Task<IActionResult> DeleteById(Guid id)
+    public async Task<ActionResult<PaginationResponse<AssessmentBriefResponse>>> FindAllByPatient(
+        Guid patientId,
+        int pageIndex = 1,
+        int pageSize = 25
+    )
     {
-        await patientService.Delete(id);
-
-        return NoContent();
+        return await assessmentService.FindAllByPatient(patientId, pageIndex, pageSize);
     }
 
     /// <summary>
-    /// Update patient
+    /// Update Assessment
     /// </summary>
-    /// <param name="id">Patient Id</param>
+    /// <param name="id">Assessment Id</param>
     /// <param name="requestBody">Request Body</param>
     /// <param name="validator"></param>
     /// <returns></returns>
     [HttpPut]
-    [Route("{id:guid}", Name = "UpdatePatient")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PatientResponse))]
+    [Route("{id:guid}", Name = "UpdateAssessment")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AssessmentResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    public async Task<ActionResult<PatientResponse>> Update(
+    public async Task<ActionResult<AssessmentResponse>> Update(
         Guid id,
-        [FromBody] UpdatePatientRequest requestBody,
-        [FromServices] IValidator<UpdatePatientRequest> validator
+        [FromBody] UpdateAssessmentRequest requestBody,
+        [FromServices] IValidator<UpdateAssessmentRequest> validator
     )
     {
         var validationResult = await validator.ValidateAsync(requestBody);
@@ -114,41 +117,24 @@ public class PatientsController(IPatientService patientService) : ControllerBase
             return BadRequest(problem);
         }
 
-        return await patientService.Update(id, requestBody);
+        return await assessmentService.Update(id, requestBody);
     }
 
     /// <summary>
-    /// Find all patients
+    /// Delete assessment
     /// </summary>
-    /// <param name="pageIndex">Page Index</param>
-    /// <param name="pageSize">Page Size</param>
+    /// <param name="id">Assessment Id</param>
     /// <returns></returns>
-    [HttpGet]
-    [Route("all", Name = "FindAllPatients")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginationResponse<PatientResponse>))]
+    [HttpDelete]
+    [Route("{id:guid}", Name = "DeleteAssessmentById")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    public async Task<ActionResult<PaginationResponse<PatientResponse>>> FindAll(int pageIndex = 1, int pageSize = 25)
+    public async Task<IActionResult> Delete(Guid id)
     {
-        return await patientService.FindAll(pageIndex, pageSize);
-    }
+        await assessmentService.Delete(id);
 
-    /// <summary>
-    /// Search Patients
-    /// </summary>
-    /// <param name="q">Query</param>
-    /// <param name="pageIndex">Page Index</param>
-    /// <param name="pageSize">Page Size</param>
-    /// <returns></returns>
-    [HttpGet]
-    [Route("search", Name = "SearchPatients")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginationResponse<PatientResponse>))]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    public async Task<ActionResult<PaginationResponse<PatientResponse>>> Search(
-        string q,
-        int pageIndex = 1,
-        int pageSize = 25
-    )
-    {
-        return await patientService.Search(q, pageIndex, pageSize);
+        return NoContent();
     }
 }

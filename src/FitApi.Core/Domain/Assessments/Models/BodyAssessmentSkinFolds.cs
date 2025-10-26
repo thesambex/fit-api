@@ -11,9 +11,10 @@ public sealed class BodyAssessmentSkinFolds
     public decimal Thoracic { get; private set; }
     public decimal Supraspinal { get; private set; }
     public decimal Thigh { get; private set; }
+    public decimal Abs { get; private set; }
     public decimal Calf { get; private set; }
     public long AssessmentId { get; init; }
-    
+
     public BodyAssessment? Assessment { get; set; }
 
     public BodyAssessmentSkinFolds()
@@ -31,6 +32,7 @@ public sealed class BodyAssessmentSkinFolds
         Thoracic = folds.Thoracic;
         Supraspinal = folds.Supraspinal;
         Thigh = folds.Thigh;
+        Abs = folds.Abs;
         Calf = folds.Calf;
     }
 
@@ -44,6 +46,7 @@ public sealed class BodyAssessmentSkinFolds
         Thoracic = folds.Thoracic;
         Supraspinal = folds.Supraspinal;
         Thigh = folds.Thigh;
+        Abs = folds.Abs;
         Calf = folds.Calf;
     }
 
@@ -59,6 +62,7 @@ public sealed class BodyAssessmentSkinFolds
             Thoracic = Thoracic,
             Supraspinal = Supraspinal,
             Thigh = Thigh,
+            Abs = Abs,
             Calf = Calf,
         };
     }

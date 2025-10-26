@@ -15,6 +15,7 @@ public class FitDbContext(DbContextOptions<FitDbContext> options) : DbContext(op
 
     public DbSet<Professional> Professionals => Set<Professional>();
 
+    public DbSet<BodyAssessmentBrief> BodyAssessmentsBrief => Set<BodyAssessmentBrief>();
     public DbSet<BodyAssessment> BodyAssessments => Set<BodyAssessment>();
     public DbSet<BodyAssessmentSkinFolds> BodyAssessmentSkinFolds => Set<BodyAssessmentSkinFolds>();
 

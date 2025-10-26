@@ -12,6 +12,7 @@ public sealed class BodyAssessment
     public decimal Height { get; private set; }
     public decimal Weight { get; private set; }
     public decimal FoldsSum { get; private set; }
+    public DateTimeOffset AssessmentDate { get; } = DateTimeOffset.UtcNow;
     public Guid ExternalId { get; } = Guid.NewGuid();
     public long PatientId { get; private init; }
     public long ProfessionalId { get; private init; }
@@ -36,6 +37,21 @@ public sealed class BodyAssessment
     {
         PatientId = patientId;
         ProfessionalId = professionalId;
+        Age = age;
+        BirthGenre = birthGenre;
+        Height = height;
+        Weight = weight;
+        FoldsSum = skinFolds.Sum();
+    }
+
+    public BodyAssessment(
+        int age,
+        BirthGenres birthGenre,
+        decimal height,
+        decimal weight,
+        SkinFolds skinFolds
+    )
+    {
         Age = age;
         BirthGenre = birthGenre;
         Height = height;

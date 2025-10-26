@@ -9,4 +9,6 @@ public interface IProfessionalService
     Task<ProfessionalResponse> FindById(Guid id);
     Task<PaginationResponse<ProfessionalResponse>> FindAll(int pageIndex, int pageSize);
     Task<PaginationResponse<ProfessionalResponse>> Search(string q, int pageIndex, int pageSize);
+    Task<ProfessionalResponse> Update(Guid id, UpdateProfessionalRequest requestBody);
+    Task Delete(Guid id);
 }

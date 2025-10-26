@@ -23,7 +23,7 @@ public class ProfessionalsController(IProfessionalService professionalService) :
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
     public async Task<ActionResult<ProfessionalResponse>> Create(
         [FromBody] CreateProfessionalRequest requestBody,
-        IValidator<CreateProfessionalRequest> validator
+        [FromServices] IValidator<CreateProfessionalRequest> validator
     )
     {
         var validationResult = await validator.ValidateAsync(requestBody);
@@ -60,6 +60,61 @@ public class ProfessionalsController(IProfessionalService professionalService) :
     public async Task<ActionResult<ProfessionalResponse>> FindById(Guid id)
     {
         return await professionalService.FindById(id);
+    }
+
+    /// <summary>
+    /// Delete professional by Id
+    /// </summary>
+    /// <param name="id">Professional Id</param>
+    /// <returns></returns>
+    [HttpDelete]
+    [Route("{id:guid}", Name = "DeleteProfessionalById")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    public async Task<IActionResult> DeleteById(Guid id)
+    {
+        await professionalService.Delete(id);
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Update professional
+    /// </summary>
+    /// <param name="id">Professional Id</param>
+    /// <param name="requestBody">Request Body</param>
+    /// <param name="validator"></param>
+    /// <returns></returns>
+    [HttpPut]
+    [Route("{id:guid}", Name = "UpdateProfessional")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProfessionalResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    public async Task<ActionResult<ProfessionalResponse>> Update(
+        Guid id,
+        [FromBody] UpdateProfessionalRequest requestBody,
+        [FromServices] IValidator<UpdateProfessionalRequest> validator
+    )
+    {
+        var validationResult = await validator.ValidateAsync(requestBody);
+        if (!validationResult.IsValid)
+        {
+            var problem = new ProblemDetails
+            {
+                Title = "Bad Request",
+                Detail = string.Join(", ", validationResult.Errors.Select(x => x.ErrorMessage)),
+                Status = StatusCodes.Status400BadRequest,
+                Instance = HttpContext.Request.Path,
+                Type = "https://httpstatuses.com/400"
+            };
+
+            return BadRequest(problem);
+        }
+
+        return await professionalService.Update(id, requestBody);
     }
 
     /// <summary>

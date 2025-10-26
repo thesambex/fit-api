@@ -122,7 +122,7 @@ public class ProfessionalsControllerTest : IClassFixture<PgContainerFixture>
     public async Task FindAll_With_Invalid_Pagination_Parameters_Should_returns_BadRequest()
     {
         var response = await _client.GetAsync($"api/professionals/all?pageIndex=0&pageSize=25");
-        
+
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
@@ -130,14 +130,14 @@ public class ProfessionalsControllerTest : IClassFixture<PgContainerFixture>
     public async Task Search_With_Valid_Pagination_Parameters_Should_returns_Ok()
     {
         await using var dbContext = _pgFixture.CreateContext();
-        
+
         var professionals = new List<Professional>()
         {
             new("Marshall D Fenders"),
             new("Marshall D Teach"),
             new("Mc Coy Smith"),
         };
-        
+
         await dbContext.Professionals.AddRangeAsync(professionals);
         await dbContext.SaveChangesAsync();
 
@@ -145,7 +145,7 @@ public class ProfessionalsControllerTest : IClassFixture<PgContainerFixture>
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadFromJsonAsync<PaginationResponse<ProfessionalResponse>>();
-        
+
         Assert.NotNull(responseBody);
         Assert.Equal(1, responseBody.PageIndex);
         Assert.Equal(25, responseBody.PageSize);
@@ -168,7 +168,7 @@ public class ProfessionalsControllerTest : IClassFixture<PgContainerFixture>
                 Assert.Equal(professionals[1].ExternalId, item2.Id);
                 Assert.Equal(professionals[1].Name, item2.Name);
             });
-        
+
         await _pgFixture.ClearDatabaseAsync();
     }
 
@@ -176,7 +176,75 @@ public class ProfessionalsControllerTest : IClassFixture<PgContainerFixture>
     public async Task Search_With_Invalid_Pagination_Parameters_Should_returns_BadRequest()
     {
         var response = await _client.GetAsync("api/professionals/search?q=D&pageIndex=0&pageSize=25");
-        
+
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Delete with existing professional should returns no content")]
+    public async Task Delete_With_Existing_Professional_Should_returns_NoContent()
+    {
+        await using var dbContext = _pgFixture.CreateContext();
+
+        var professional = new Professional("Test");
+
+        await dbContext.Professionals.AddAsync(professional);
+        await dbContext.SaveChangesAsync();
+
+        var response = await _client.DeleteAsync($"api/professionals/{professional.ExternalId}");
+        response.EnsureSuccessStatusCode();
+
+        await _pgFixture.ClearDatabaseAsync();
+    }
+
+    [Fact(DisplayName = "Delete with not existing professional should returns not found")]
+    public async Task Delete_With_NotExisting_Professional_Should_returns_NotFound()
+    {
+        var response = await _client.DeleteAsync($"api/professionals/{Guid.Empty}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Update professional with invalid parameters should returns bad request")]
+    public async Task Update_Professional_With_Invalid_Parameters_Should_returns_BadRequest()
+    {
+        var requestBody = new UpdateProfessionalRequest("");
+
+        var response = await _client.PutAsJsonAsync($"api/professionals/{Guid.Empty}", requestBody);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Update with existing professional should returns ok")]
+    public async Task Update_With_Existing_Professional_Should_returns_Ok()
+    {
+        await using var dbContext = _pgFixture.CreateContext();
+
+        var requestBody = new UpdateProfessionalRequest("Coy");
+
+        var professional = new Professional("Test");
+
+        await dbContext.Professionals.AddAsync(professional);
+        await dbContext.SaveChangesAsync();
+
+        var response = await _client.PutAsJsonAsync($"api/professionals/{professional.ExternalId}", requestBody);
+        response.EnsureSuccessStatusCode();
+        
+        var responseBody = await response.Content.ReadFromJsonAsync<ProfessionalResponse>();
+
+        Assert.NotNull(responseBody);
+        Assert.Equal(professional.ExternalId, responseBody.Id);
+        Assert.Equal(requestBody.Name, responseBody.Name);
+        
+        await _pgFixture.ClearDatabaseAsync();
+    }
+
+    [Fact(DisplayName = "Update with not existing professional should returns not found")]
+    public async Task Update_With_NotExisting_Professional_Should_returns_NotFound()
+    {
+        var requestBody = new UpdateProfessionalRequest("Coy");
+
+        var response = await _client.PutAsJsonAsync($"api/professionals/{Guid.Empty}", requestBody);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

@@ -10,6 +10,8 @@ public interface IProfessionalRepository
     Task<IReadOnlyList<Professional>> FindAll(int pageIndex, int pageSize,
         CancellationToken cancellationToken = default);
 
+    Task DeleteById(long id, CancellationToken cancellationToken = default);
+    
     Task<IReadOnlyList<Professional>> Search(
         string q,
         int pageIndex,

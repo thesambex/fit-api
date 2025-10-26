@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FitApi.Database.Migrations
 {
     [DbContext(typeof(FitDbContext))]
-    [Migration("20251020201917_Initial")]
+    [Migration("20251022181850_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -40,6 +40,12 @@ namespace FitApi.Database.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("integer")
                         .HasColumnName("age");
+
+                    b.Property<DateTimeOffset>("AssessmentDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("assessment_date")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<BirthGenres>("BirthGenre")
                         .HasColumnType("patients.birth_genres")
@@ -78,6 +84,34 @@ namespace FitApi.Database.Migrations
                     b.ToTable("body_assessments", "assessments");
                 });
 
+            modelBuilder.Entity("FitApi.Core.Domain.Assessments.Models.BodyAssessmentBrief", b =>
+                {
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("PatientExternalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_external_id");
+
+                    b.Property<string>("ProfessionalName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("professional_name");
+
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("numeric")
+                        .HasColumnName("weight");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_assessments_brief", "assessments");
+                });
+
             modelBuilder.Entity("FitApi.Core.Domain.Assessments.Models.BodyAssessmentSkinFolds", b =>
                 {
                     b.Property<long>("Id")
@@ -86,6 +120,9 @@ namespace FitApi.Database.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("Abs")
+                        .HasColumnType("numeric");
 
                     b.Property<long>("AssessmentId")
                         .HasColumnType("bigint")

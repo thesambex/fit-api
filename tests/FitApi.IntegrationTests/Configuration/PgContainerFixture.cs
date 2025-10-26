@@ -51,7 +51,7 @@ public class PgContainerFixture : IAsyncLifetime
         {
             throw new InvalidOperationException("PgContainerFixture.CreateContext(): DataSource is null");
         }
-        
+
         var options = new DbContextOptionsBuilder<FitDbContext>()
             .UseNpgsql(DataSource)
             .Options;
@@ -60,18 +60,38 @@ public class PgContainerFixture : IAsyncLifetime
         if (dbContext.Database.GetMigrations().Any())
         {
             dbContext.Database.Migrate();
+
+            ApplyViews(dbContext);
         }
 
         return dbContext;
     }
-    
+
+    public static void ApplyViews(FitDbContext dbContext)
+    {
+        dbContext.Database.ExecuteSqlRaw(@"CREATE OR REPLACE VIEW assessments.vw_assessments_brief AS
+                                         SELECT
+                                         ba.external_id AS id,
+                                         ba.assessment_date AS date,
+                                         ba.weight AS weight,
+                                         p1.name AS professional_name,
+                                         p2.external_id AS patient_external_id
+                                         FROM assessments.body_assessments ba
+                                         INNER JOIN professionals.professionals p1 ON p1.id = ba.professional_id
+                                         INNER JOIN patients.patients p2 ON p2.id = ba.patient_id
+                                         ORDER BY ba.assessment_date;");
+    }
+
     public async Task ClearDatabaseAsync()
     {
         await using var dbContext = CreateContext();
 
+        await dbContext.BodyAssessmentSkinFolds.ExecuteDeleteAsync();
+        await dbContext.BodyAssessments.ExecuteDeleteAsync();
+
         await dbContext.Patients.ExecuteDeleteAsync();
         await dbContext.Professionals.ExecuteDeleteAsync();
-        
+
         await dbContext.SaveChangesAsync();
     }
 }

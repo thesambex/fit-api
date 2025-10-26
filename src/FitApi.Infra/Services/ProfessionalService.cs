@@ -73,4 +73,35 @@ public class ProfessionalService(
         
         return new  PaginationResponse<ProfessionalResponse>(responseData, pageIndex, pageSize, totalPages, totalCount);
     }
+
+    public async Task<ProfessionalResponse> Update(Guid id, UpdateProfessionalRequest requestBody)
+    {
+        var professional = await professionalRepository.FindByExternalId(id);
+        if (professional == null)
+        {
+            throw new NotFoundException("Professional not found");
+        }
+        
+        professional.SetName(requestBody.Name);
+        
+        await unitOfWork.SaveChangesAsync();
+        
+        logger.LogInformation("Professional {id} updated", professional.ExternalId);
+        
+        return new ProfessionalResponse(id, professional.Name);
+    }
+
+    public async Task Delete(Guid id)
+    {
+        var professional = await professionalRepository.FindByExternalId(id);
+        if (professional == null)
+        {
+            throw new NotFoundException("Professional not found");
+        }
+        
+        await professionalRepository.DeleteById(professional.Id);
+        await unitOfWork.SaveChangesAsync();
+        
+        logger.LogInformation("Professional {id} deleted", professional.ExternalId);
+    }
 }

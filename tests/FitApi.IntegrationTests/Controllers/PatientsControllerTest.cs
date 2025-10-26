@@ -208,12 +208,22 @@ public class PatientsControllerTest : IClassFixture<PgContainerFixture>
         await _pgFixture.ClearDatabaseAsync();
     }
 
-    [Fact(DisplayName = "Delete with existing patient should returns not found")]
+    [Fact(DisplayName = "Delete with not existing patient should returns not found")]
     public async Task Delete_With_NotExisting_Patient_Should_returns_NotFound()
     {
         var response = await _client.DeleteAsync($"api/patients/{Guid.Empty}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Update patient with invalid parameters should returns bad request")]
+    public async Task Update_Patient_With_Invalid_Parameters_Should_returns_BadRequest()
+    {
+        var requestBody = new UpdatePatientRequest("", DateOnly.MinValue, BirthGenres.Male);
+
+        var response = await _client.PutAsJsonAsync($"api/patients/{Guid.Empty}", requestBody);
+        
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact(DisplayName = "Update with existing patient should returns ok")]
