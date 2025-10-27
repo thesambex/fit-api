@@ -52,10 +52,6 @@ namespace FitApi.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("external_id");
 
-                    b.Property<decimal>("FoldsSum")
-                        .HasColumnType("decimal(10,9)")
-                        .HasColumnName("folds_sum");
-
                     b.Property<decimal>("Height")
                         .HasColumnType("decimal(3, 2)")
                         .HasColumnName("height");

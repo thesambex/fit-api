@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FitApi.Database.Migrations
 {
     [DbContext(typeof(FitDbContext))]
-    [Migration("20251026225326_Initial")]
+    [Migration("20251027124121_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -54,10 +54,6 @@ namespace FitApi.Database.Migrations
                     b.Property<Guid>("ExternalId")
                         .HasColumnType("uuid")
                         .HasColumnName("external_id");
-
-                    b.Property<decimal>("FoldsSum")
-                        .HasColumnType("decimal(10,9)")
-                        .HasColumnName("folds_sum");
 
                     b.Property<decimal>("Height")
                         .HasColumnType("decimal(3, 2)")

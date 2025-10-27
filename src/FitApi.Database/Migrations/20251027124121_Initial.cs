@@ -69,7 +69,6 @@ namespace FitApi.Database.Migrations
                     birth_genre = table.Column<BirthGenres>(type: "patients.birth_genres", nullable: false),
                     height = table.Column<decimal>(type: "numeric(3,2)", nullable: false),
                     weight = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
-                    folds_sum = table.Column<decimal>(type: "numeric(10,9)", nullable: false),
                     assessment_date = table.Column<DateTimeOffset>(type: "timestamptz", nullable: false, defaultValueSql: "now()"),
                     external_id = table.Column<Guid>(type: "uuid", nullable: false),
                     patient_id = table.Column<long>(type: "bigint", nullable: false),

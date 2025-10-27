@@ -15,7 +15,7 @@ internal class BodyAssessmentMapping : IEntityTypeConfiguration<BodyAssessment>
         builder.Property(e => e.Weight).HasColumnName("weight").HasColumnType("decimal(5, 2)").IsRequired();
         builder.Property(e => e.Age).HasColumnName("age").IsRequired();
         builder.Property(e => e.BirthGenre).HasColumnName("birth_genre").IsRequired();
-        builder.Property(e => e.FoldsSum).HasColumnName("folds_sum").HasColumnType("decimal(10,9)").IsRequired();
+        builder.Ignore(e => e.FoldsSum);
         builder.Property(e => e.AssessmentDate).HasColumnName("assessment_date").HasColumnType("timestamptz")
             .HasDefaultValueSql("now()").IsRequired();
         builder.Property(e => e.ExternalId).HasColumnName("external_id").IsRequired();
