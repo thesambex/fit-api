@@ -8,7 +8,7 @@ Currently, have two implemented assessments protocols: Jackson & Pollock 7 and 3
 
 \[Disclaimer\]
 
-I'm not fitness instructor, this project is based in my experience in gym fitness assessments.
+I'm not fitness instructor, this project is based in my experience in gym fitness assessments performed on myself.
 
 ### Technologies
 
@@ -23,7 +23,7 @@ Atualmente, existem dois protocolos de avaliação física implementados: Jackso
 
 \[Nota\]
 
-Eu não sou um profissional de educação física, esse projeto é baseado em minha experiência com avaliações físicas em academias.
+Eu não sou um profissional de educação física, esse projeto é baseado em minha experiência com avaliações físicas realizadas em mim em academias.
 
 ### Tecnologias
 
