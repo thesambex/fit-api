@@ -91,6 +91,15 @@ namespace FitApi.Database.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("patient_external_id");
 
+                    b.Property<string>("PatientName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("patient_name");
+
+                    b.Property<Guid>("ProfessionalExternalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("professional_external_id");
+
                     b.Property<string>("ProfessionalName")
                         .IsRequired()
                         .HasColumnType("text")

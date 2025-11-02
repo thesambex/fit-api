@@ -143,8 +143,8 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    [Fact(DisplayName = "Find all by parent id with valid pagination parameters should returns paginated list")]
-    public async Task FindAllByParentId_With_Valid_Pagination_Parameters_Should_returns_PaginatedList()
+    [Fact(DisplayName = "Find all by patient id with valid pagination parameters should returns paginated list")]
+    public async Task FindAllByPatientId_With_Valid_Pagination_Parameters_Should_returns_PaginatedList()
     {
         await using var dbContext = _pgFixture.CreateContext();
 
@@ -156,7 +156,6 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
 
         await dbContext.SaveChangesAsync();
 
-        var skinFolds = new SkinFolds { Thigh = 1.2m };
         var bodyAssessment =
             new BodyAssessment(patient.Id, professional.Id, 30, BirthGenres.Male, 1.70m, 70m);
 
@@ -186,20 +185,95 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
             Assert.Equal(bodyAssessment.ExternalId, item1.Id);
             Assert.Equal(DateOnly.FromDateTime(bodyAssessment.AssessmentDate.DateTime), item1.Date);
             Assert.Equal(professional.Name, item1.ProfessionalName);
+            Assert.Equal(patient.Name, item1.PatientName);
             Assert.Equal(bodyAssessment.Weight, item1.Weight);
         });
 
         await _pgFixture.ClearDatabaseAsync();
     }
 
-    [Fact(DisplayName = "Find all by parent id with invalid pagination parameters should returns bad request")]
-    public async Task FindAllByParentId_With_Invalid_Pagination_Parameters_Should_returns_BadRequest()
+    [Fact(DisplayName = "Find all by patient id with invalid pagination parameters should returns bad request")]
+    public async Task FindAllByPatientId_With_Invalid_Pagination_Parameters_Should_returns_BadRequest()
     {
         const int pageIndex = 0;
         const int pageSize = 25;
 
         var response = await _client.GetAsync(
             $"api/assessments/patient/{Guid.Empty}/all?pageIndex={pageIndex}&pageSize={pageSize}");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Find all by professional id with valid pagination parameters should returns paginated list")]
+    public async Task FindAllByProfessionalId_With_Valid_Pagination_Parameters_Should_returns_PaginatedList()
+    {
+        await using var dbContext = _pgFixture.CreateContext();
+
+        var patients = new List<Patient>
+        {
+            new("Mary", new DateOnly(1992, 3, 5), BirthGenres.Female),
+            new("John Marston", new DateOnly(1997, 5, 3), BirthGenres.Male),
+        };
+
+        var professional = new Professional("Marshall");
+
+        await dbContext.Patients.AddRangeAsync(patients);
+        await dbContext.Professionals.AddAsync(professional);
+
+        await dbContext.SaveChangesAsync();
+
+        var bodyAssessments = new List<BodyAssessment>
+        {
+            new(patients[0].Id, professional.Id, 33, BirthGenres.Female, 1.70m, 70m),
+            new(patients[1].Id, professional.Id, 28, BirthGenres.Male, 1.70m, 70m)
+        };
+
+        await dbContext.BodyAssessments.AddRangeAsync(bodyAssessments);
+        await dbContext.SaveChangesAsync();
+
+        var response = await _client.GetAsync($"api/assessments/professional/{professional.ExternalId}/all");
+        response.EnsureSuccessStatusCode();
+
+        var responseBody = await response.Content.ReadFromJsonAsync<PaginationResponse<AssessmentBriefResponse>>();
+
+        Assert.NotNull(responseBody);
+        Assert.Equal(1, responseBody.PageIndex);
+        Assert.Equal(25, responseBody.PageSize);
+        Assert.Equal(2, responseBody.TotalCount);
+        Assert.Equal(1, responseBody.TotalPages);
+        Assert.False(responseBody.HasNextPage);
+        Assert.False(responseBody.HasPreviousPage);
+        Assert.NotNull(responseBody.Data);
+
+        Assert.Collection(responseBody.Data,
+            item1 =>
+            {
+                Assert.Equal(bodyAssessments[0].ExternalId, item1.Id);
+                Assert.Equal(DateOnly.FromDateTime(bodyAssessments[0].AssessmentDate.DateTime), item1.Date);
+                Assert.Equal(professional.Name, item1.ProfessionalName);
+                Assert.Equal(patients[0].Name, item1.PatientName);
+                Assert.Equal(bodyAssessments[0].Weight, item1.Weight);
+            },
+            item2 =>
+            {
+                Assert.Equal(bodyAssessments[1].ExternalId, item2.Id);
+                Assert.Equal(DateOnly.FromDateTime(bodyAssessments[1].AssessmentDate.DateTime), item2.Date);
+                Assert.Equal(professional.Name, item2.ProfessionalName);
+                Assert.Equal(patients[1].Name, item2.PatientName);
+                Assert.Equal(bodyAssessments[1].Weight, item2.Weight);
+            });
+
+        await _pgFixture.ClearDatabaseAsync();
+    }
+    
+    [Fact(DisplayName = "Find all by professional id with invalid pagination parameters should returns bad request")]
+    public async Task FindAllByProfessionalId_With_Invalid_Pagination_Parameters_Should_returns_BadRequest()
+    {
+        const int pageIndex = 0;
+        const int pageSize = 25;
+
+        var response = await _client.GetAsync(
+            $"api/assessments/professional/{Guid.Empty}/all?pageIndex={pageIndex}&pageSize={pageSize}");
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -310,7 +384,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
     public async Task Delete_With_NotExisting_Assessment_Should_returns_NotFound()
     {
         var response = await _client.DeleteAsync($"api/assessments/{Guid.Empty}");
-        
+
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
@@ -350,12 +424,12 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
 
         await dbContext.BodyAssessmentSkinFolds.AddAsync(bodyAssessmentSkinFolds);
         await dbContext.SaveChangesAsync();
-        
+
         var response = await _client.GetAsync($"api/assessments/{bodyAssessment.ExternalId}/result");
         response.EnsureSuccessStatusCode();
 
         var responseBody = await response.Content.ReadFromJsonAsync<AssessmentResult>();
-        
+
         Assert.NotNull(responseBody);
         Assert.Equal(23.92m, responseBody.Bmi);
         Assert.Equal(5.67m, responseBody.BodyFarWeight);
@@ -363,7 +437,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
         Assert.Equal(63.05m, responseBody.FoldsSum);
         Assert.Equal(61.83m, responseBody.LeanMass);
         Assert.Equal(1.0798m, responseBody.BodyDensity);
-        
+
         await _pgFixture.ClearDatabaseAsync();
     }
 
@@ -371,7 +445,7 @@ public class AssessmentControllerTest : IClassFixture<PgContainerFixture>
     public async Task Result_With_NotExistingId_Should_returns_NotFound()
     {
         var response = await _client.GetAsync($"api/assessments/{Guid.Empty}/result");
-        
+
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

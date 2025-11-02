@@ -100,7 +100,7 @@ public class AssessmentService(
 
         var patient = bodyAssessment.Patient!;
         var professional = bodyAssessment.Professional!;
-        
+
         bodyAssessment.UpdateFoldSumFromChild();
 
         var skinFolds = new SkinFoldsReqResp(
@@ -142,7 +142,31 @@ public class AssessmentService(
 
         var responseData = records.Select(e => new AssessmentBriefResponse(e.Id,
             DateOnly.FromDateTime(e.Date.LocalDateTime), e.Weight,
-            e.ProfessionalName)).ToList();
+            e.ProfessionalName, e.PatientName)).ToList();
+
+        return new PaginationResponse<AssessmentBriefResponse>(responseData, pageIndex, pageSize, totalPages,
+            totalCount);
+    }
+
+    public async Task<PaginationResponse<AssessmentBriefResponse>> FindAllByProfessional(
+        Guid professionalId,
+        int pageIndex,
+        int pageSize
+    )
+    {
+        if (pageIndex <= 0 || pageSize <= 0)
+        {
+            throw new PaginationException("Invalid pagination parameters");
+        }
+
+        var records = await bodyAssessmentRepository.FindAllByProfessionalId(professionalId, pageIndex, pageSize);
+        var totalCount = await bodyAssessmentRepository.CountByProfessionalId(professionalId);
+        
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var responseData = records.Select(e => new AssessmentBriefResponse(e.Id,
+            DateOnly.FromDateTime(e.Date.LocalDateTime), e.Weight,
+            e.ProfessionalName, e.PatientName)).ToList();
 
         return new PaginationResponse<AssessmentBriefResponse>(responseData, pageIndex, pageSize, totalPages,
             totalCount);

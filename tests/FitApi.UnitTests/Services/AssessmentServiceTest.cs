@@ -197,12 +197,13 @@ public class AssessmentServiceTest
         Assert.Equal("Body assessment not found", exception.Message);
     }
 
-    [Fact(DisplayName = "Find all by parent id with valid pagination parameters should returns paginated list")]
-    public async Task FindAllByParentId_With_Valid_Pagination_Parameters_Should_returns_PaginatedList()
+    [Fact(DisplayName = "Find all by patient id with valid pagination parameters should returns paginated list")]
+    public async Task FindAllByPatientId_With_Valid_Pagination_Parameters_Should_returns_PaginatedList()
     {
         const int pageIndex = 1;
         const int pageSize = 25;
         var patientId = Guid.NewGuid();
+        var professionalId = Guid.NewGuid();
 
         var assessmentBriefs = new List<BodyAssessmentBrief>()
         {
@@ -211,6 +212,8 @@ public class AssessmentServiceTest
                 Id = Guid.NewGuid(),
                 Date = DateTimeOffset.MinValue,
                 PatientExternalId = patientId,
+                PatientName = "Carl",
+                ProfessionalExternalId = professionalId,
                 ProfessionalName = "Alex",
                 Weight = 1m
             },
@@ -219,6 +222,8 @@ public class AssessmentServiceTest
                 Id = Guid.NewGuid(),
                 Date = DateTimeOffset.MinValue,
                 PatientExternalId = patientId,
+                PatientName = "Carl",
+                ProfessionalExternalId = professionalId,
                 ProfessionalName = "Alex",
                 Weight = 2m
             }
@@ -232,6 +237,11 @@ public class AssessmentServiceTest
             .ReturnsAsync(assessmentBriefs.Count);
 
         var response = await _assessmentService.FindAllByPatient(patientId, pageIndex, pageSize);
+
+        _bodyAssessmentRepository.Verify(
+            r => r.FindAllByPatientId(patientId, pageIndex, pageSize, CancellationToken.None), Times.Once);
+
+        _bodyAssessmentRepository.Verify(r => r.CountByPatientId(patientId, CancellationToken.None), Times.Once);
 
         Assert.NotNull(response);
         Assert.Equal(1, response.PageIndex);
@@ -248,6 +258,7 @@ public class AssessmentServiceTest
                 Assert.Equal(assessmentBriefs[0].Id, item1.Id);
                 Assert.Equal(DateOnly.FromDateTime(assessmentBriefs[0].Date.DateTime), item1.Date);
                 Assert.Equal(assessmentBriefs[0].ProfessionalName, item1.ProfessionalName);
+                Assert.Equal(assessmentBriefs[0].PatientName, item1.PatientName);
                 Assert.Equal(assessmentBriefs[0].Weight, item1.Weight);
             },
             item2 =>
@@ -255,15 +266,100 @@ public class AssessmentServiceTest
                 Assert.Equal(assessmentBriefs[1].Id, item2.Id);
                 Assert.Equal(DateOnly.FromDateTime(assessmentBriefs[1].Date.DateTime), item2.Date);
                 Assert.Equal(assessmentBriefs[1].ProfessionalName, item2.ProfessionalName);
+                Assert.Equal(assessmentBriefs[1].PatientName, item2.PatientName);
                 Assert.Equal(assessmentBriefs[1].Weight, item2.Weight);
             });
     }
 
-    [Fact(DisplayName = "Find all by parent id with invalid pagination parameters should throws pagination exception")]
-    public async Task FindAllByParentId_With_Invalid_Pagination_Parameters_Should_throws_PaginationException()
+    [Fact(DisplayName = "Find all by patient id with invalid pagination parameters should throws pagination exception")]
+    public async Task FindAllByPatientId_With_Invalid_Pagination_Parameters_Should_throws_PaginationException()
     {
         var exception = await Assert.ThrowsAsync<PaginationException>(async () =>
             await _assessmentService.FindAllByPatient(Guid.Empty, 0, 0));
+
+        Assert.NotNull(exception);
+        Assert.Equal("Invalid pagination parameters", exception.Message);
+    }
+
+    [Fact(DisplayName = "Find all by professional with valid pagination parameters should returns paginated list")]
+    public async Task FindAllByProfessional_With_Valid_Pagination_Parameters_Should_returns_PaginatedList()
+    {
+        const int pageIndex = 1;
+        const int pageSize = 25;
+        var professionalId = Guid.NewGuid();
+
+        var assessmentBriefs = new List<BodyAssessmentBrief>()
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTimeOffset.MinValue,
+                PatientExternalId = Guid.NewGuid(),
+                PatientName = "Carl",
+                ProfessionalExternalId = professionalId,
+                ProfessionalName = "Alex",
+                Weight = 1m
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Date = DateTimeOffset.MinValue,
+                PatientExternalId = Guid.NewGuid(),
+                PatientName = "Carl",
+                ProfessionalExternalId = professionalId,
+                ProfessionalName = "Alex",
+                Weight = 2m
+            }
+        };
+
+        _bodyAssessmentRepository
+            .Setup(r => r.FindAllByProfessionalId(professionalId, pageIndex, pageSize, CancellationToken.None))
+            .ReturnsAsync(assessmentBriefs);
+
+        _bodyAssessmentRepository.Setup(r => r.CountByProfessionalId(professionalId, CancellationToken.None))
+            .ReturnsAsync(assessmentBriefs.Count);
+
+        var response = await _assessmentService.FindAllByProfessional(professionalId, pageIndex, pageSize);
+
+        _bodyAssessmentRepository.Verify(
+            r => r.FindAllByProfessionalId(professionalId, pageIndex, pageSize, CancellationToken.None), Times.Once);
+
+        _bodyAssessmentRepository.Verify(r => r.CountByProfessionalId(professionalId, CancellationToken.None),
+            Times.Once);
+
+        Assert.NotNull(response);
+        Assert.Equal(1, response.PageIndex);
+        Assert.Equal(25, response.PageSize);
+        Assert.Equal(2, response.TotalCount);
+        Assert.Equal(1, response.TotalPages);
+        Assert.False(response.HasNextPage);
+        Assert.False(response.HasPreviousPage);
+        Assert.NotNull(response.Data);
+
+        Assert.Collection(response.Data,
+            item1 =>
+            {
+                Assert.Equal(assessmentBriefs[0].Id, item1.Id);
+                Assert.Equal(DateOnly.FromDateTime(assessmentBriefs[0].Date.DateTime), item1.Date);
+                Assert.Equal(assessmentBriefs[0].ProfessionalName, item1.ProfessionalName);
+                Assert.Equal(assessmentBriefs[0].PatientName, item1.PatientName);
+                Assert.Equal(assessmentBriefs[0].Weight, item1.Weight);
+            },
+            item2 =>
+            {
+                Assert.Equal(assessmentBriefs[1].Id, item2.Id);
+                Assert.Equal(DateOnly.FromDateTime(assessmentBriefs[1].Date.DateTime), item2.Date);
+                Assert.Equal(assessmentBriefs[1].ProfessionalName, item2.ProfessionalName);
+                Assert.Equal(assessmentBriefs[1].PatientName, item2.PatientName);
+                Assert.Equal(assessmentBriefs[1].Weight, item2.Weight);
+            });
+    }
+
+    [Fact(DisplayName = "Find all by professional with invalid pagination parameters should throws pagination exception()")]
+    public async Task FindAllByProfessional_With_Invalid_Pagination_Parameters_Should_throws_PaginationException()
+    {
+        var exception = await Assert.ThrowsAsync<PaginationException>(async () =>
+            await _assessmentService.FindAllByProfessional(Guid.Empty, 0, 0));
 
         Assert.NotNull(exception);
         Assert.Equal("Invalid pagination parameters", exception.Message);
@@ -412,7 +508,7 @@ public class AssessmentServiceTest
 
         _bodyAssessmentRepository.Verify(r => r.FindByExternalId(bodyAssessment.ExternalId, CancellationToken.None),
             Times.Once);
-        
+
         Assert.NotNull(response);
         Assert.Equal(23.92m, response.Bmi);
         Assert.Equal(5.67m, response.BodyFarWeight);
@@ -427,7 +523,7 @@ public class AssessmentServiceTest
     {
         var exception = await Assert.ThrowsAsync<NotFoundException>(async () =>
             await _assessmentService.Result(Guid.Empty, AssessmentsProtocols.Jp7));
-        
+
         Assert.NotNull(exception);
         Assert.Equal("Body assessment not found", exception.Message);
     }

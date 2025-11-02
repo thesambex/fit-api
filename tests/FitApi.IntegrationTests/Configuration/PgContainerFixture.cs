@@ -70,16 +70,18 @@ public class PgContainerFixture : IAsyncLifetime
     public static void ApplyViews(FitDbContext dbContext)
     {
         dbContext.Database.ExecuteSqlRaw(@"CREATE OR REPLACE VIEW assessments.vw_assessments_brief AS
-                                         SELECT
-                                         ba.external_id AS id,
-                                         ba.assessment_date AS date,
-                                         ba.weight AS weight,
-                                         p1.name AS professional_name,
-                                         p2.external_id AS patient_external_id
-                                         FROM assessments.body_assessments ba
-                                         INNER JOIN professionals.professionals p1 ON p1.id = ba.professional_id
-                                         INNER JOIN patients.patients p2 ON p2.id = ba.patient_id
-                                         ORDER BY ba.assessment_date;");
+                                            SELECT
+                                            ba.external_id AS id,
+                                            ba.assessment_date AS date,
+                                            ba.weight AS weight,
+	                                        p1.external_id AS professional_external_id,
+                                            p1.name AS professional_name,
+                                            p2.external_id AS patient_external_id,
+	                                        p2.name AS patient_name
+                                            FROM assessments.body_assessments ba
+                                            INNER JOIN professionals.professionals p1 ON p1.id = ba.professional_id
+                                            INNER JOIN patients.patients p2 on p2.id = ba.patient_id
+                                            ORDER BY ba.assessment_date;");
     }
 
     public async Task ClearDatabaseAsync()

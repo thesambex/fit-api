@@ -16,4 +16,13 @@ public interface IBodyAssessmentRepository
     );
 
     Task<long> CountByPatientId(Guid patientId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<BodyAssessmentBrief>> FindAllByProfessionalId(
+        Guid professionalId,
+        int pageIndex,
+        int pageSize,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<long> CountByProfessionalId(Guid professionalId, CancellationToken cancellationToken = default);
 }

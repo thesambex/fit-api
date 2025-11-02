@@ -34,4 +34,20 @@ public class BodyAssessmentRepository(FitDbContext dbContext) : IBodyAssessmentR
 
     public async Task<long> CountByPatientId(Guid patientId, CancellationToken cancellationToken) => await dbContext
         .BodyAssessmentsBrief.Where(e => e.PatientExternalId == patientId).LongCountAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<BodyAssessmentBrief>> FindAllByProfessionalId(
+        Guid professionalId,
+        int pageIndex,
+        int pageSize,
+        CancellationToken cancellationToken
+    ) => await dbContext.BodyAssessmentsBrief.AsNoTracking()
+        .OrderBy(e => e.Date)
+        .Where(e => e.ProfessionalExternalId == professionalId)
+        .Skip((pageIndex - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync(cancellationToken);
+
+    public async Task<long> CountByProfessionalId(Guid professionalId, CancellationToken cancellationToken) =>
+        await dbContext.BodyAssessmentsBrief.Where(e => e.ProfessionalExternalId == professionalId)
+            .LongCountAsync(cancellationToken);
 }

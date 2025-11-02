@@ -8,7 +8,19 @@ public interface IAssessmentService
 {
     Task<AssessmentResponse> Create(CreateAssessmentRequest requestBody);
     Task<AssessmentResponse> FindById(Guid id);
-    Task<PaginationResponse<AssessmentBriefResponse>> FindAllByPatient(Guid patientId, int pageIndex, int pageSize);
+
+    Task<PaginationResponse<AssessmentBriefResponse>> FindAllByPatient(
+        Guid patientId,
+        int pageIndex,
+        int pageSize
+    );
+
+    Task<PaginationResponse<AssessmentBriefResponse>> FindAllByProfessional(
+        Guid professionalId,
+        int pageIndex,
+        int pageSize
+    );
+
     Task<AssessmentResponse> Update(Guid id, UpdateAssessmentRequest requestBody);
     Task Delete(Guid id);
     Task<AssessmentResult> Result(Guid id, AssessmentsProtocols protocolType);

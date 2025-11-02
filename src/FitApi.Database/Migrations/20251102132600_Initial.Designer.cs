@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FitApi.Database.Migrations
 {
     [DbContext(typeof(FitDbContext))]
-    [Migration("20251027124121_Initial")]
+    [Migration("20251102132600_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -93,6 +93,15 @@ namespace FitApi.Database.Migrations
                     b.Property<Guid>("PatientExternalId")
                         .HasColumnType("uuid")
                         .HasColumnName("patient_external_id");
+
+                    b.Property<string>("PatientName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("patient_name");
+
+                    b.Property<Guid>("ProfessionalExternalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("professional_external_id");
 
                     b.Property<string>("ProfessionalName")
                         .IsRequired()

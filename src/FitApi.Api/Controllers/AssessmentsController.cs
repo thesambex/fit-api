@@ -85,6 +85,27 @@ public class AssessmentsController(IAssessmentService assessmentService) : Contr
     }
 
     /// <summary>
+    /// Find all assessments from professional
+    /// </summary>
+    /// <param name="professionalId">Professional Id</param>
+    /// <param name="pageIndex">Page Index</param>
+    /// <param name="pageSize">Page Size</param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("professional/{professionalId:guid}/all", Name = "FindAssessmentsByProfessionalId")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginationResponse<AssessmentBriefResponse>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    public async Task<ActionResult<PaginationResponse<AssessmentBriefResponse>>> FindAllByProfessional(
+        Guid professionalId,
+        int pageIndex = 1,
+        int pageSize = 25
+    )
+    {
+        return await assessmentService.FindAllByProfessional(professionalId, pageIndex, pageSize);
+    }
+
+    /// <summary>
     /// Update Assessment
     /// </summary>
     /// <param name="id">Assessment Id</param>
