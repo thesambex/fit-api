@@ -19,33 +19,33 @@ steps:
   - task: DotNetCoreCLI@2
     displayName: 'Restore dependencies'
     inputs:
-      command: 'restore'  
-      
+      command: 'restore'
+
   - task: DotNetCoreCLI@2
     displayName: 'Build solution'
     inputs:
       command: 'build'
       projects: '**/*.csproj'
       arguments: '--configuration $(buildConfiguration) --no-restore'
-      
+
   - script: docker info
     displayName: 'Check docker status'
-    
-  - task: 
+
+  - task: DotNetCoreCLI@2
     displayName: 'Run unit tests'
     inputs:
       command: 'test'
       projects: 'tests/FitApi.UnitTests/FitApi.UnitTests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build --logger trx --results-directory $(Agent.TempDirectory)/test-results/unit'
-      
-  - task: 
+
+  - task: DotNetCoreCLI@2
     displayName: 'Run integration tests'
     inputs:
       command: 'test'
       projects: 'tests/FitApi.IntegrationTests/FitApi.IntegrationTests.csproj'
       arguments: '--configuration $(buildConfiguration) --no-build --logger trx --results-directory $(Agent.TempDirectory)/test-results/integration'
-      
-  - task: 
+
+  - task: PublishTestResults@2
     displayName: 'Publish test results'
     inputs:
       testResultsFiles: '$(Agent.TempDirectory)/test-results/**/*.trx'
