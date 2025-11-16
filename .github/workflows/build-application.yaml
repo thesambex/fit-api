@@ -38,13 +38,13 @@ jobs:
         run: dotnet restore FitApi.sln
 
       - name: Build solution
-          run: dotnet build FitApi.sln --no-restore --configuration Release
+        run: dotnet build FitApi.sln --no-restore --configuration Release
 
       - name: Run Unit Tests
-          run: dotnet test tests/FitApi.UnitTests/FitApi.UnitTests.csproj --no-build --configuration Release
+        run: dotnet test tests/FitApi.UnitTests/FitApi.UnitTests.csproj --no-build --configuration Release
 
       - name: Run Integration Tests (Testcontainers)
-          env:
-            DOTNET_DOCKER_HOST: "unix:///var/run/docker.sock"
-          run: dotnet test tests/FitApi.IntegrationTests/FitApi.IntegrationTests.csproj --no-build --configuration Release      
+        env:
+          DOTNET_DOCKER_HOST: "unix:///var/run/docker.sock"
+        run: dotnet test tests/FitApi.IntegrationTests/FitApi.IntegrationTests.csproj --no-build --configuration Release      
   
