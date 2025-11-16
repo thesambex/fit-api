@@ -11,8 +11,8 @@ jobs:
     services:
       docker:
         image: docker:24-dind
-        privileged: true
         options: >-
+          --privileged
           --dns 8.8.8.8
           --dns 8.8.4.4
     steps:
