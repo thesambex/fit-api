@@ -13,7 +13,7 @@ public sealed class BodyAssessment
     public decimal Weight { get; private set; }
     public decimal FoldsSum { get; private set; }
     public DateTimeOffset AssessmentDate { get; } = DateTimeOffset.UtcNow;
-    public Guid ExternalId { get; } = Guid.NewGuid();
+    public Guid ExternalId { get; } = Guid.CreateVersion7();
     public long PatientId { get; private init; }
     public long ProfessionalId { get; private init; }
 

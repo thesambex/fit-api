@@ -24,64 +24,67 @@ namespace FitApi.Api;
 
 public static class DependencyInjection
 {
-    public static void InjectDependencies(this WebApplicationBuilder builder)
+    extension(WebApplicationBuilder builder)
     {
-        builder.InjectDatabase();
-        builder.InjectServices();
-        
-        builder.Host.UseSerilog((context, loggerConfiguration) =>
-            loggerConfiguration.ReadFrom.Configuration(context.Configuration)
-        );
-
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(opt =>
+        public void InjectDependencies()
         {
-            opt.SwaggerDoc("v1", new OpenApiInfo
+            builder.InjectDatabase();
+            builder.InjectServices();
+        
+            builder.Host.UseSerilog((context, loggerConfiguration) =>
+                loggerConfiguration.ReadFrom.Configuration(context.Configuration)
+            );
+
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(opt =>
             {
-                Version = "v1",
-                Title = "FitApi",
-            });
+                opt.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "FitApi",
+                });
             
-            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-        });
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            });
         
-        builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientValidator>();
+            builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientValidator>();
 
-        builder.Services.AddProblemDetails();
-        builder.Services.AddExceptionHandler<GlobalExceptionHandlingMiddleware>();
-        builder.Services.AddControllers().AddJsonOptions(opt =>
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandlingMiddleware>();
+            builder.Services.AddControllers().AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
+        }
+
+        private void InjectDatabase()
         {
-            opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        });
-    }
+            builder.Services.AddDbContext<FitDbContext>(opt =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("FitDb");
 
-    private static void InjectDatabase(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddDbContext<FitDbContext>(opt =>
+                var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+                npgsqlDataSourceBuilder.MapEnum<BirthGenres>("patients.birth_genres");
+
+                var npgsqlDatasource = npgsqlDataSourceBuilder.Build();
+
+                opt.UseNpgsql(npgsqlDatasource);
+            });
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            builder.Services.AddTransient<IPatientRepository, PatientRepository>();
+            builder.Services.AddTransient<IProfessionalRepository, ProfessionalRepository>();
+            builder.Services.AddTransient<IBodyAssessmentRepository, BodyAssessmentRepository>();
+            builder.Services.AddTransient<IBodyAssessmentSkinFoldsRepository, BodyAssessmentSkinFoldsRepository>();
+        }
+
+        private void InjectServices()
         {
-            var connectionString = builder.Configuration.GetConnectionString("FitDb");
-
-            var npgsqlDataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-            npgsqlDataSourceBuilder.MapEnum<BirthGenres>("patients.birth_genres");
-
-            var npgsqlDatasource = npgsqlDataSourceBuilder.Build();
-
-            opt.UseNpgsql(npgsqlDatasource);
-        });
-
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-        builder.Services.AddTransient<IPatientRepository, PatientRepository>();
-        builder.Services.AddTransient<IProfessionalRepository, ProfessionalRepository>();
-        builder.Services.AddTransient<IBodyAssessmentRepository, BodyAssessmentRepository>();
-        builder.Services.AddTransient<IBodyAssessmentSkinFoldsRepository, BodyAssessmentSkinFoldsRepository>();
-    }
-
-    private static void InjectServices(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<IPatientService, PatientService>();
-        builder.Services.AddScoped<IProfessionalService, ProfessionalService>();
-        builder.Services.AddScoped<IAssessmentService, AssessmentService>();
+            builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IProfessionalService, ProfessionalService>();
+            builder.Services.AddScoped<IAssessmentService, AssessmentService>();
+        }
     }
 }

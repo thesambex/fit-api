@@ -6,7 +6,7 @@ public sealed class Professional
 {
     public long Id { get; init; }
     public string Name { get; private set; } = string.Empty;
-    public Guid ExternalId { get; init; } = Guid.NewGuid();
+    public Guid ExternalId { get; init; } = Guid.CreateVersion7();
 
     public ICollection<BodyAssessment>? BodyAssessments { get; set; }
     
